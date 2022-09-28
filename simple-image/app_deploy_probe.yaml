@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: myapp
+  name: myapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myapp
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - image: danielives/simple-app:v1
+        imagePullPolicy: Always
+        name: myapp
+        ports: [containerPort: 8080]
+        resources: {}
+        env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+            httpHeaders:
+            - name: Custom-Header
+              value: Awesome
+          initialDelaySeconds: 5 # default is 0
+          periodSeconds: 10      # default
+          timeoutSeconds: 1      # default (how long I'm prepared to wait for an OK)
+          failureThreshold: 1    # default
+          successThreshold: 1    # default & only allowed value for liveness and startup
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8080
+            httpHeaders:
+            - name: Custom-Header
+              value: Awesome
+          initialDelaySeconds: 30
+          periodSeconds: 3

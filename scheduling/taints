@@ -1,0 +1,19 @@
+#!/bin/bash
+. ../demo-magic.sh
+clear
+
+pe "kubectl apply -f ../simple-image/app_pod.yaml"
+#pe "kubectl run web --image=httpd"
+pe "kubectl taint node worker status=dodgy:NoSchedule"
+pe "kubectl run web --image=nginx"
+pe "kubectl delete po web"
+pe "kubectl taint node worker status=dodgy:NoSchedule-"
+pe "kubectl taint node worker status=flaky:NoExecute"
+pe "kubectl apply -f ../simple-image/app_pod.yaml"
+#pe "kubectl run web --image=httpd"
+pe "kubectl delete po myapp"
+pe "tail ./tolerant_pod.yaml"
+pe "kubectl apply -f ./tolerant_pod.yaml"
+pe "kubectl apply -f ./tolerant_pod.yaml"
+pe "kubectl taint node worker status=flaky:NoExecute-"
+pe "kubectl delete po myapp"

@@ -1,0 +1,14 @@
+#!/bin/bash
+. ../demo-magic.sh
+clear
+
+pe "kubectl run nginx --image=nginx"
+pe "kubectl label pod nginx owner=dan"
+pe "kubectl label pod nginx version=v1"
+pe "kubectl get pod nginx --show-labels"
+
+pe "kubectl get pods"
+pe "kubectl get pods -l owner=dan"
+pe "kubectl get pods -l 'run in (myapp, nginx)'"
+
+pe "kubectl delete pod nginx"

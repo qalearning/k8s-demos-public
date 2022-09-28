@@ -1,0 +1,54 @@
+#!/bin/bash
+. ../../demo-magic.sh
+clear
+
+pe "less pod.yaml"
+pe "kubectl apply -f pod.yaml"
+pei "kubectl wait --for=condition=ready pod hello"
+pe "kubectl get pods -o wide"
+pe "kubectl get pod hello --output=custom-columns=ip:.status.podIP --no-headers"
+pe 'docker exec kind-control-plane curl $(kubectl get pod hello -o=custom-columns=ip:.status.podIP --no-headers)'
+p "# simulate a failure..."
+pei "kubectl delete pod hello"
+pei "sleep 10"
+pe "kubectl get pods"
+p "# and it'll never come back!"
+
+# ReplicaSets manage Pods
+
+pe "less rs.yaml"
+pe "kubectl apply -f rs.yaml"
+pei "kubectl wait --for=condition=ready pod -l=app=hello"
+pe "kubectl get pods"
+pe "kubectl get replicasets"
+pe "docker exec kind-control-plane curl $(kubectl get pod -l=app=hello -o=custom-columns=ip:.status.podIP --no-headers)"
+pe "# simulate a failure..."
+pe "kubectl delete pod -l=app=hello"
+pe "kubectl get pods -o wide"
+pe "docker exec kind-control-plane curl $(kubectl get pod -l=app=hello -o=custom-columns=ip:.status.podIP --no-headers)"
+p "# but what about when we need to release v2????"
+pe "kubectl set image replicaset/hello hello=danielives/helloworld:v2"
+p "# ...there are other ways, this is but one"
+pe "kubectl get replicasets -o wide"
+pe "docker exec kind-control-plane curl $(kubectl get pod -l=app=hello -o=custom-columns=ip:.status.podIP --no-headers)"
+p "# ah."
+pe "kubectl delete pod -l=app=hello"
+pei "kubectl wait --for=condition=ready pod -l=app=hello"
+pe "docker exec kind-control-plane curl $(kubectl get pod -l=app=hello -o=custom-columns=ip:.status.podIP --no-headers)"
+pe "kubectl delete replicaset hello"
+
+# Deployments manage ReplicaSets
+
+pe "less dep.yaml"
+pe "kubectl apply -f dep.yaml"
+pei "kubectl wait --for=condition=ready pod -l=app=hello"
+pe "kubectl get pods"
+pe "kubectl get replicasets"
+pe "kubectl get deployments"
+pe "docker exec kind-control-plane curl $(kubectl get pod -l=app=hello -o=custom-columns=ip:.status.podIP --no-headers)"
+p "# let's release v2"
+pei "kubectl set image deployment/hello hello=danielives/helloworld:v2"
+pei "kubectl get pods,replicasets,deployments -o wide"
+pe "kubectl get pods,replicasets,deployments -o wide"
+pe "docker exec kind-control-plane curl $(kubectl get pod -l=app=hello -o=custom-columns=ip:.status.podIP --no-headers)"
+pe "kubectl delete deployment hello"

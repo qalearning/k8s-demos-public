@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginxsec
+spec:
+  securityContext:
+    runAsNonRoot: true
+  containers:
+  - name: nginx
+    image: nginxinc/nginx-unprivileged

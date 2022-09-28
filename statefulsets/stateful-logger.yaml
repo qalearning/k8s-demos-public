@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: stateful
+  labels:
+    app: stateful
+spec:
+  serviceName: stateful
+  replicas: 3
+  selector:
+    matchLabels:
+      app: stateful
+  template:
+    metadata:
+      labels:
+        app: stateful
+    spec:
+      containers:
+      - args:
+        - /bin/sh
+        - -c
+        - 'i=0; while true; do echo $i: $(date) from $POD_NAME on $POD_IP >> /stateful_data/logger.log; i=$((i+1)); sleep 5; done'
+        image: busybox
+        name: stateful
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name          
+        volumeMounts:
+        - name: stateful-data
+          mountPath: /stateful_data
+  # These are converted to volume claims by the controller
+  # and mounted at the paths mentioned above.
+  volumeClaimTemplates:
+  - metadata:
+      name: stateful-data
+    spec:
+      accessModes: 
+        - ReadWriteOnce
+      storageClassName: ""
+      resources:
+        requests:
+          storage: "5Mi"

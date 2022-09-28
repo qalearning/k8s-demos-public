@@ -1,0 +1,2 @@
+#!/bin/bash
+linkerd viz -n $1 edges deployment

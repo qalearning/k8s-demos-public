@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: hello
+  name: hello
+spec:
+  containers:
+  - image: danielives/helloworld:v1
+    name: hello-world

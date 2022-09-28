@@ -1,0 +1,6 @@
+#!/bin/bash
+export host1=external.$1.nip.io
+export host0=internal.$1.nip.io
+yq -i e '.spec.rules[0].host = strenv(host0) | .spec.rules[1].host = strenv(host1)' ingress-nip.yaml
+
+echo "# point browser at external.$1.nip.io:NodePort"

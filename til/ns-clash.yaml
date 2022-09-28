@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web
+  # namespace: a-ns
+spec:
+  containers:
+  - image: httpd
+    name: web

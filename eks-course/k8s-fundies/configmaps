@@ -1,0 +1,18 @@
+#!/bin/bash
+. ../../demo-magic.sh
+clear
+
+pe "kubectl create namespace dev"
+pe "kubectl create namespace prod"
+pe "less cm-dev.yaml"
+pe "less cm-prod.yaml"
+pe "kubectl apply -f cm-dev.yaml"
+pe "kubectl apply -f cm-prod.yaml"
+pe "less cmpod.yaml"
+pe "kubectl apply -f cmpod.yaml --namespace dev"
+pe "kubectl apply -f cmpod.yaml --namespace prod"
+pei "kubectl wait --for=condition=ready pod cm-demo --namespace prod"
+pei "kubectl wait --for=condition=ready pod cm-demo --namespace dev"
+pe "kubectl logs cm-demo --namespace dev"
+pe "kubectl logs cm-demo --namespace prod"
+pe "kubectl delete namespace dev prod"

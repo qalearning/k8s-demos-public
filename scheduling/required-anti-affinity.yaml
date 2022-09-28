@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    id: very-important
+  name: deploy-important
+  namespace: default
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      id: very-important
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        id: very-important
+    spec:
+      containers:
+      - image: nginx:1.17.6-alpine
+        name: container1
+        resources: {}
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: id
+                operator: In
+                values:
+                - very-important
+            topologyKey: kubernetes.io/hostname

@@ -1,0 +1,28 @@
+#!/bin/bash
+. ../demo-magic.sh
+clear
+
+pei "#create dev NAMESPACE and deployment:"
+pe "kubectl create namespace dev"
+pe "kubectl create deploy some-app --image=nginx --replicas=1 --namespace dev"
+
+pei "#create prod NAMESPACE:"
+pe "kubectl create namespace prod"
+pe "kubectl create deploy some-app --image=nginx --replicas=3 -n prod"
+
+pe "kubectl get pods"
+pei "#oh darn"
+pe "kubectl get pods --namespace dev"
+pe "kubectl get pods -n prod"
+
+pei "#set the namespace for this context"
+pe "kubectl config set-context --current --namespace=dev"
+pe "kubectl get pods"
+pei "#change the namespace"
+pe "kubectl config set-context --current --namespace=prod"
+pe "kubectl get pods"
+
+pei "#tidy up"
+pe "kubectl config set-context --current --namespace=default"
+pe "kubectl delete namespace dev prod"
+

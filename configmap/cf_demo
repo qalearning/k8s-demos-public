@@ -1,0 +1,14 @@
+#!/bin/bash
+. ../demo-magic.sh
+
+pei "#create namespaces"
+pe "kubectl create namespace dev"
+pe "kubectl create namespace prod"
+pei "#apply slightly different cfs to the 2 namespaces"
+pe "kubectl -n dev apply -f cf.yaml"
+pe "kubectl -n prod apply -f cf2.yaml"
+pei "#spin up nginx in both namespaces"
+pe "kubectl -n dev apply -f nginx.yaml"
+pe "kubectl -n prod apply -f nginx.yaml"
+
+pe 'for ns in dev prod; do kubectl get po -n $ns -o wide; done;'

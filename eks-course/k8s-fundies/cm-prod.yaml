@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dbinfo
+  namespace: prod
+data:
+  db_hostname: prod_db
+  db_engine: postgres

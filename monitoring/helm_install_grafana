@@ -1,0 +1,11 @@
+#!/bin/bash
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update
+helm install grafana bitnami/grafana \
+    --set persistence.enabled=false \
+    --set service.type=NodePort \
+    --namespace monitoring \
+    --create-namespace
+
+# connect grafana to prometheus at:
+# http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090

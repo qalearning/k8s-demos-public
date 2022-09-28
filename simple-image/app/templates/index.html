@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Index{% endblock %}
+
+{% block content %}
+<main role="main">
+
+    <h1>Hello Kubernetes!</h1>
+    <p>
+        Pod <b>{{ podname }}</b> running on node: <b>{{ nodename }}</b>
+    </p>
+    <hr>
+
+</main>
+{% endblock %}

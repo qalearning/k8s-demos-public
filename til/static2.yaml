@@ -1,0 +1,19 @@
+# from https://docs.projectcalico.org/networking/use-specific-ip
+# requires an ipam type of calico-ipam in /etc/cni/net.d/10-calico.conflist
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: hello
+  name: hello
+  annotations:
+    cni.projectcalico.org/ipAddrs: "[\"192.168.17.17\"]"
+spec:
+  containers:
+  - image: nginx
+    name: hello
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}

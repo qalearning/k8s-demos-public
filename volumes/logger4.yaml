@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: logger4
+  name: logger4
+spec:
+  containers:
+  - args:
+    - /bin/sh
+    - -c
+    - 'i=0; while true; do echo $i: $(date) >> /var/log/logger.log; i=$((i+1)); sleep 5; done'
+    image: busybox
+    name: logger
+    volumeMounts:
+    - name: varlog
+      mountPath: /var/log
+  - name: logger-sidecar
+    image: busybox
+    args: [/bin/sh, -c, 'tail -n+1 -f /var/log/logger.log']
+    volumeMounts:
+    - name: varlog
+      mountPath: /var/log
+      readOnly: true
+  volumes:
+  - name: varlog
+    hostPath:
+      path: /tmp/logger #slightly less ephemeral - known location on the pod's host
+      type: DirectoryOrCreate
+  

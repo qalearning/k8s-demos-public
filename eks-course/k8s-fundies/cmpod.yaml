@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: cm-demo
+  name: cm-demo
+spec:
+  containers:
+  - image: busybox
+    name: cm-demo
+    resources: {}
+    args:
+    - /bin/sh
+    - -c
+    - 'i=0; while true; do echo $i: $DB_ENGINE@$DB_HOST; i=$((i+1)); sleep 5; done'
+    env:
+      - name: DB_ENGINE
+        valueFrom:
+          configMapKeyRef:
+            name: dbinfo
+            key: db_engine
+      - name: DB_HOST
+        valueFrom:
+          configMapKeyRef:
+            name: dbinfo
+            key: db_hostname

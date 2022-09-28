@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dbinfo
+  namespace: dev
+data:
+  db_hostname: dev_db
+  db_engine: mysql

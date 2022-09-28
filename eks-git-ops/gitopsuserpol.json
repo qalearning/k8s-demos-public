@@ -1,0 +1,31 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "codebuild:StartBuild",
+                "codebuild:BatchGetBuilds",
+                "codecommit:MergeBranchesBySquash",
+                "codecommit:TagResource",
+                "codecommit:PutFile",
+                "codecommit:CreateCommit",
+                "codecommit:GetCommentsForComparedCommit",
+                "codecommit:MergeBranchesByFastForward",
+                "codecommit:GetCommit",
+                "codecommit:GetComment",
+                "codecommit:GetCommitHistory",
+                "codecommit:GetDifferences",
+                "codecommit:GetCommitsFromMergeBase",
+                "codecommit:GetBranch",
+                "codecommit:GetMergeCommit",
+                "codecommit:DeleteFile",
+                "codecommit:GetPullRequest",
+                "codecommit:List*",
+                "codecommit:GitPull",
+                "codecommit:GitPush"
+            ],
+            "Resource": "*",
+            "Effect": "Allow"
+        }
+    ]
+}

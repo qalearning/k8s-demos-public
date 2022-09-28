@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  default.conf: |   # name of the file that will be mounted
+    server {
+        listen 80;
+        location / {
+            return 200 "OK dev this is a longer message\n";
+        }
+    }
