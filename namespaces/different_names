@@ -1,0 +1,15 @@
+#!/bin/bash
+. ../demo-magic.sh
+clear
+
+pei "#create dev deployment:"
+pe "kubectl create deploy some-app-dev --image=nginx --replicas=1"
+
+pei "#create prod deployment:"
+pe "kubectl create deploy some-app-prod --image=nginx --replicas=3"
+
+pei "#ok that worked"
+pei "#but it isn't really parity."
+pei "#and what if we have different security and access requirements?"
+pe "kubectl delete deploy some-app-dev some-app-prod"
+

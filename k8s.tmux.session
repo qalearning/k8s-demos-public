@@ -1,0 +1,9 @@
+#!/bin/bash -xe
+# Example session adapted from: https://stackoverflow.com/questions/5609192/how-to-set-up-tmux-so-that-it-starts-up-with-specified-windows-opened
+new -s SessionName -n WindowName k8s
+splitw -v -p 95 -t 0 -c "demo" '{ bash; }'
+splitw -v -p 90 -t 1 -c "curler" '{ cd ~/k8s-demos/; bash ./curler.sh; }'
+
+splitw -v -p 90 -t 2 -c "pods" '{ cd ~/k1spy/; bash ./k1s.py pods; }'
+selectp -t 3
+splitw -h -p 50 -t 3 -c "all" '{ cd ~/k1spy/; bash ./k1s.py -slow; }'

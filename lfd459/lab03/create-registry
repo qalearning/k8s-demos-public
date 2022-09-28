@@ -1,0 +1,44 @@
+#!/bin/bash
+# install podman
+curl -fsSL -o podman-linux-amd64.tar.gz \
+  https://github.com/mgoltzsche/podman-static/releases/latest/download/podman-linux-amd64.tar.gz
+tar -xf podman-linux-amd64.tar.gz
+sudo cp -r podman-linux-amd64/usr podman-linux-amd64/etc /
+rm podman-linux-amd64.tar.gz
+rm -r podman-linux-amd64/
+
+# create registry
+kubectl apply -f $(find $HOME -name easyregistry.yaml)
+
+export REG_IP=$(kubectl get svc registry --no-headers -o=custom-columns=ip:.spec.clusterIP)
+export repo=$REG_IP:5000
+echo "export repo=$REG_IP:5000" >> ~/.bashrc
+
+# update registries
+sudo sed -i "s/<YOUR-registry-IP-Here/$REG_IP/g" /etc/containers/registries.conf.d/registry.conf
+
+cat <<EOF > local_reg
+
+      [plugins."io.containerd.grpc.v1.cri".registry.mirrors."*"]
+        endpoint = ["http://$REG_IP:5000"]
+EOF
+
+sudo cp /etc/containerd/config.toml .
+line=$(grep -n 'registry.mirrors' config.toml | cut -d ":" -f 1)
+{ head -n $(($line)) config.toml; cat local_reg; tail -n +$(($line+1)) config.toml; } > new_config.toml
+sudo cp new_config.toml /etc/containerd/config.toml
+
+rm new_config.toml
+sudo rm config.toml
+sudo systemctl restart containerd
+sudo systemctl restart kubelet
+
+# outputs
+echo run the following command on your WORKER:
+echo sudo sed -i "s/<YOUR-registry-IP-Here/$REG_IP/g" /etc/containers/registries.conf.d/registry.conf
+echo
+echo 'then insert the contents of local_reg in /etc/containerd/config.toml on your WORKER (around line 153)'
+echo
+echo finally, again on your WORKER, run:
+echo sudo systemctl restart containerd
+echo sudo systemctl restart kubelet

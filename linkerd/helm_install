@@ -1,0 +1,13 @@
+#!/bin/bash
+helm repo add linkerd https://helm.linkerd.io/stable
+
+helm repo update
+
+exp=$(date -d '+8760 hour' +"%Y-%m-%dT%H:%M:%SZ")
+
+helm install linkerd2 \
+  --set-file identityTrustAnchorsPEM=ca.crt \
+  --set-file identity.issuer.tls.crtPEM=issuer.crt \
+  --set-file identity.issuer.tls.keyPEM=issuer.key \
+  --set identity.issuer.crtExpiry=$exp \
+  linkerd/linkerd2

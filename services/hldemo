@@ -1,0 +1,17 @@
+#!/bin/bash
+. ../demo-magic.sh
+clear
+
+pe "less external.yaml"
+pe "less headless.yaml"
+pe "kubectl apply -f external.yaml"
+pe "kubectl apply -f headless.yaml"
+pei "kubectl wait --for=condition=ready pod -l=app=myapp"
+pe "kubectl get deploy,svc,ep"
+pe "kubectl run tmp01 --image=tutum/dnsutils -- sleep infinity"
+pe "kubectl exec -it tmp01 -- nslookup mysql"
+pe "kubectl exec -it tmp01 -- nslookup myapp"
+pe "kubectl exec -it tmp01 -- nslookup myapp-headless"
+pei "kubectl delete -f headless.yaml"
+pei "kubectl delete -f external.yaml"
+pei "kubectl delete pod tmp01 --force"

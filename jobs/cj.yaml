@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  creationTimestamp: null
+  name: somecron
+spec:
+  jobTemplate:
+    metadata:
+      creationTimestamp: null
+      name: somecron
+    spec:
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          containers:
+          - image: busybox
+            name: somecron
+          restartPolicy: OnFailure
+  schedule: '* * * * *'

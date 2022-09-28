@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple
+  labels:
+    app: simple
+spec:
+  ports:
+  - port: 80
+    name: web
+  clusterIP: None
+  selector:
+    app: stateful
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  creationTimestamp: null
+  labels:
+    app: stateful
+  name: stateful
+spec:
+  replicas: 3
+  serviceName: "simple"
+  selector:
+    matchLabels:
+      app: stateful
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: stateful
+    spec:
+      containers:
+      - image: danielives/simple-app:v1
+        name: simple-app
+        resources: {}

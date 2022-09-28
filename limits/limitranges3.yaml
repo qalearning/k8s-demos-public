@@ -1,0 +1,20 @@
+# this is per the lab
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: low-usage-limit
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  namespace: low-usage-limit
+  name: low-resource-range
+spec:
+  limits:
+  - max:
+      cpu: 1
+      memory: 400Mi
+    defaultRequest:
+      cpu: 0.5
+      memory: 100Mi
+    type: Container

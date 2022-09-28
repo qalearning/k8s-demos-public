@@ -1,0 +1,51 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: plug-in-new-lb.stable.qa.com
+  finalizers:
+  - remove-lb.stable.qa.com
+spec:
+  group: stable.qa.com
+  versions:
+    - name: v1alpha1
+      served: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                emailAddress:
+                  type: string
+                serviceName:
+                  type: string
+                serviceNamespace:
+                  type: string
+                serialNumber:
+                  type: string
+    - name: v1beta1
+      served: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                emailAddress:
+                  type: string
+                  pattern: 
+                serviceName:
+                  type: string
+                serviceNamespace:
+                  type: string
+                serialNumber:
+                  type: string  
+  scope: Namespaced
+  names:
+    plural: fetchnewlbs
+    singular: fetchnewlb
+    shortNames:
+    - newlb
+    kind: FetchNewLB

@@ -1,0 +1,4 @@
+#!/bin/bash
+. ../demo-magic.sh
+
+pe 'for ns in dev prod; do kubectl delete namespace $ns; done;'

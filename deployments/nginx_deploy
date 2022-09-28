@@ -1,0 +1,11 @@
+#!/bin/bash
+
+. ../demo-magic.sh
+clear
+
+pe "kubectl apply -f nginx1.yaml"
+pe "kubectl get deploy nginx -o yaml | grep ' strategy:' -A4"
+pe "kubectl set image deploy nginx nginx=nginx:1.17"
+pei "kubectl rollout pause deploy nginx"
+pe "kubectl rollout resume deploy nginx"
+pe "kubectl rollout undo deploy nginx"

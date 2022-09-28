@@ -1,0 +1,37 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv01
+  labels:
+    type: local
+spec:
+  storageClassName: ""
+  claimRef:
+    name: stateful-data-stateful-0
+    namespace: default
+  capacity:
+    storage: 50Mi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /tmp/data01
+  persistentVolumeReclaimPolicy: Delete
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv02
+  labels:
+    type: local
+spec:
+  storageClassName: ""
+  claimRef:
+    name: stateful-data-stateful-1
+    namespace: default
+  capacity:
+    storage: 50Mi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /tmp/data02
+  persistentVolumeReclaimPolicy: Delete

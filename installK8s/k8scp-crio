@@ -1,0 +1,192 @@
+#!/bin/bash
+export OS=xUbuntu_20.04
+export VERSION=1.23 #specify a k8s version
+export CP_ADDRESS=10.0.1.10 #make sure this matches your CP node internal address
+
+# Bring node to current versions and install an editor and other software
+sudo apt-get update && sudo apt-get upgrade -y
+
+sudo apt-get install -y vim nano libseccomp2
+
+# Prepare for cri-o
+sudo modprobe overlay
+sudo modprobe br_netfilter
+
+echo "net.bridge.bridge-nf-call-iptables = 1" | sudo tee -a /etc/sysctl.d/99-kubernetes-cri.conf
+echo "net.ipv4.ip_forward = 1" | sudo tee -a /etc/sysctl.d/99-kubernetes-cri.conf
+echo "net.bridge.bridge-nf-call-ip6tables = 1" | sudo tee -a /etc/sysctl.d/99-kubernetes-cri.conf
+ 
+sudo sysctl --system
+
+# Add an alias for the local system to /etc/hosts
+sudo sh -c "echo $CP_ADDRESS k8scp >> /etc/hosts"
+
+# Set the versions to use
+
+#Add repos and keys   
+echo "deb http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/$VERSION/$OS/ /" | sudo tee -a /etc/apt/sources.list.d/cri-0.list
+
+curl -L http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/$VERSION/$OS/Release.key | sudo apt-key add -
+
+echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/$OS/ /" | sudo tee -a /etc/apt/sources.list.d/libcontainers.list
+
+sudo apt-get update
+
+# Install cri-o
+sudo apt-get install -y cri-o cri-o-runc podman buildah
+
+sleep 3
+
+# Fix a bug, may not always be needed
+sudo sed -i 's/,metacopy=on//g' /etc/containers/storage.conf
+
+
+sleep 3
+
+sudo systemctl daemon-reload
+
+sudo systemctl enable crio
+
+sudo systemctl start crio
+# In case you need to check status:     systemctl status crio
+
+# Add Kubernetes repo and software 
+sudo sh -c "echo 'deb http://apt.kubernetes.io/ kubernetes-xenial main' >> /etc/apt/sources.list.d/kubernetes.list"
+
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+
+sudo apt-get update
+
+sudo apt-get install -y kubeadm=$VERSION.1-00 kubelet=$VERSION.1-00 kubectl=$VERSION.1-00
+
+cat << EOF > kubeadm-config.yaml
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: InitConfiguration
+bootstrapTokens:
+- groups:
+  - system:bootstrappers:kubeadm:default-node-token
+  token: abcdef.0123456789abcdef
+  ttl: 24h0m0s
+  usages:
+  - signing
+  - authentication
+localAPIEndpoint:
+  bindPort: 6443
+nodeRegistration:
+  criSocket: unix:///var/run/crio/crio.sock
+  name: cp
+  taints: null
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration
+apiServer:
+  timeoutForControlPlane: 4m0s
+certificatesDir: /etc/kubernetes/pki
+clusterName: kubernetes
+controllerManager: {}
+controlPlaneEndpoint: "k8scp:6443"
+dns:
+  type: CoreDNS
+etcd:
+  local:
+    dataDir: /var/lib/etcd
+imageRepository: k8s.gcr.io
+kubernetesVersion: $VERSION.1
+networking:
+  dnsDomain: cluster.local
+  serviceSubnet: 10.96.0.0/12
+  podSubnet: 192.168.0.0/16
+scheduler: {}
+---
+apiVersion: kubelet.config.k8s.io/v1beta1
+authentication:
+  anonymous:
+    enabled: false
+  webhook:
+    cacheTTL: 0s
+    enabled: true
+  x509:
+    clientCAFile: /etc/kubernetes/pki/ca.crt
+authorization:
+  mode: Webhook
+  webhook:
+    cacheAuthorizedTTL: 0s
+    cacheUnauthorizedTTL: 0s
+cgroupDriver: systemd
+clusterDNS:
+- 10.96.0.10
+clusterDomain: cluster.local
+cpuManagerReconcilePeriod: 0s
+evictionPressureTransitionPeriod: 0s
+fileCheckFrequency: 0s
+healthzBindAddress: 127.0.0.1
+healthzPort: 10248
+httpCheckFrequency: 0s
+imageMinimumGCAge: 0s
+kind: KubeletConfiguration
+logging: {}
+nodeStatusReportFrequency: 0s
+nodeStatusUpdateFrequency: 0s
+resolvConf: /run/systemd/resolve/resolv.conf
+rotateCertificates: true
+runtimeRequestTimeout: 0s
+shutdownGracePeriod: 0s
+shutdownGracePeriodCriticalPods: 0s
+staticPodPath: /etc/kubernetes/manifests
+streamingConnectionIdleTimeout: 0s
+syncFrequency: 0s
+volumeStatsAggPeriod: 0s
+EOF
+
+# Now install the cp using the kubeadm.yaml file from tarball
+sudo kubeadm init --config=kubeadm-config.yaml --upload-certs | tee kubeadm-init.out
+
+sleep 5
+
+echo "Running the steps explained at the end of the init output for you"
+
+mkdir -p $HOME/.kube
+
+sleep 2
+
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+
+sleep 2
+
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+echo "Apply Calico network plugin from ProjectCalico.org"
+echo "If you see an error they may have updated the yaml file"
+echo "Use a browser, navigate to the site and find the updated file"
+
+kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+
+echo
+
+# Add alias for podman to docker for root and non-root user
+echo "alias sudo="sudo "" | tee -a $HOME/.bashrc
+echo "alias docker=podman" | tee -a $HOME/.bashrc
+
+# Add Helm to make our life easier
+wget https://get.helm.sh/helm-v3.7.0-linux-amd64.tar.gz
+tar -xf helm-v3.7.0-linux-amd64.tar.gz
+sudo cp linux-amd64/helm /usr/local/bin/
+
+#make life easier
+sudo apt-get install bash-completion -y
+echo "source <(kubectl completion bash)" >> $HOME/.bashrc
+source ~/.bashrc
+
+echo
+sleep 3
+echo "You should see this node in the output below"
+echo "It can take up to a mintue for node to show Ready status"
+echo
+kubectl get node
+echo
+echo
+echo "Script finished. Copy the run_this_on_worker script onto your worker node, make it executable and run it"
+
+cp k8sworker-crio run_this_on_worker
+tail kubeadm-init.out -n 2 >> run_this_on_worker
+

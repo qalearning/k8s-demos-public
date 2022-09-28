@@ -1,0 +1,15 @@
+#!/bin/bash
+. ../demo-magic.sh
+clear
+
+pei "#create dev deployment:"
+pe "kubectl create deploy some-app --image=nginx --replicas=1"
+
+pei "#create prod deployment:"
+pe "kubectl create deploy some-app --image=nginx --replicas=3"
+
+pei "#oh darn"
+
+pei "#tidy up"
+pe "kubectl delete deploy some-app"
+

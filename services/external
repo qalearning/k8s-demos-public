@@ -1,0 +1,11 @@
+#!/bin/bash
+. ../demo-magic.sh
+clear
+
+pe "less external.yaml"
+pe "kubectl apply -f external.yaml"
+pe "kubectl get deploy,svc,ep"
+pe "kubectl run tmp01 --image=tutum/dnsutils -- sleep infinity"
+pe "kubectl exec -it tmp01 -- nslookup mysql"
+pei "kubectl delete -f external.yaml"
+pei "kubectl delete pod tmp01"

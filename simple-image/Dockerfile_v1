@@ -1,0 +1,17 @@
+FROM python:3.9-slim-bullseye
+
+RUN groupadd --gid 12345 appuser \
+    && useradd --uid 12345 --gid 12345 --system --no-create-home appuser
+RUN mkdir /data && chown appuser:appuser /data
+
+WORKDIR /code
+
+COPY ./requirements.txt /code/requirements.txt
+
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+
+COPY ./app /code/app
+
+USER appuser
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
