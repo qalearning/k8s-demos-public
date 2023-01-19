@@ -1,7 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  creationTimestamp: null
   labels:
     app: nginx
   name: nginx
@@ -17,7 +16,6 @@ spec:
       maxUnavailable: 0%
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: nginx
     spec:

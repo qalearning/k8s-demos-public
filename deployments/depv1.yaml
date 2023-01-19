@@ -1,7 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  creationTimestamp: null
   labels:
     app: simple-app
   name: simple-app
@@ -21,5 +20,5 @@ spec:
         app: simple-app
     spec:
       containers:
-      - image: danielives/helloworld:v1
+      - image: danielives/simple-app:v1
         name: simple-app
