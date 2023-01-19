@@ -1,0 +1,15 @@
+#!/bin/bash
+../demo-magic.sh
+clear
+
+NS=my-restricted-namespace
+pei "less restricted-ns.yaml"
+pe "kubectl apply -f restricted-ns.yaml"
+pe "kubectl -n $NS run web --image=nginx"
+pe "kubectl -n $NS run web --image=nginxinc/nginx-unprivileged"
+pe "less security_context_2.yaml"
+pe "kubectl -n $NS apply -f security_context_2.yaml"
+pe "less pss-compliant.yaml"
+pe "kubectl apply -f pss-compliant.yaml"
+
+pe "kubectl delete ns $NS"

@@ -5,7 +5,7 @@ metadata:
     app: myapp
   name: myapp
 spec:
-  nodeName: controller
+  nodeName: cp
   containers:
   - image: danielives/simple-app:v1
     name: myapp

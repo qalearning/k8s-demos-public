@@ -10,7 +10,7 @@ pe "kubectl rollout resume deployments.app/simple-app"
 
 pe "kubectl rollout history deployments.app/simple-app"
 
-pe "kubectl set image deployments.app/simple-app simple-app=danielives/hellworld:v3 --record"
+pe "kubectl set image deployments.app/simple-app simple-app=danielives/helloworld:v3 --record"
 
 pe "kubectl rollout history deployments.app/simple-app"
 

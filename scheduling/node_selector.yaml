@@ -6,7 +6,7 @@ metadata:
   name: myapp
 spec:
   nodeSelector:
-    kubernetes.io/hostname: dave
+    highmem: true
   containers:
   - image: danielives/simple-app:v1
     name: myapp
