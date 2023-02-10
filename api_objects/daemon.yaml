@@ -16,4 +16,3 @@ spec:
       containers:
       - image: danielives/helloworld:v1
         name: hello-world
-        resources: {}

@@ -1,13 +1,63 @@
 #!/bin/bash
+# install step
+# sudo apt-get install step -y
+
+#create certs (linkerd install does this for us, helm doesn't)
+# Create CA private key
+# if [ ! -f ca-private.pem ]; then
+#     openssl ecparam -name prime256v1 -genkey -noout -out ca-private.pem
+# fi
+# # Create CA public key
+# openssl ec -in ca-private.pem -pubout -out ca-public.pem
+# # Create self signed CA certificate
+# openssl req -x509 -new -key ca-private.pem -days 365 -out ca.crt -subj "/CN=root.linkerd.cluster.local"
+
+# # Create issuer private key
+# if [ ! -f issuer-private.pem ]; then
+#     openssl ecparam -name prime256v1 -genkey -noout -out issuer-private.pem
+# fi
+# # Create issuer public key
+# openssl ec -in issuer-private.pem -pubout -out issuer-public.pem
+# # Create certificate signing request (BUG: the extension added here will be ignored by the signing)
+# openssl req -new -key issuer-private.pem -out issuer.csr -subj "/CN=identity.linkerd.cluster.local" \
+#     -addext basicConstraints=critical,CA:TRUE
+# # Create issuer cert by signing request
+# openssl x509 \
+#     -extfile /etc/ssl/openssl.cnf \
+#     -extensions v3_ca \
+#     -req \
+#     -in issuer.csr \
+#     -days 180 \
+#     -CA ca.crt \
+#     -CAkey ca-private.pem \
+#     -CAcreateserial \
+#     -extensions v3_ca \
+#     -out issuer.crt
+# rm issuer.csr
+
+#metrics server is required
+# kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+# enable insecure-tls
+
 helm repo add linkerd https://helm.linkerd.io/stable
 
 helm repo update
 
 exp=$(date -d '+8760 hour' +"%Y-%m-%dT%H:%M:%SZ")
 
-helm install linkerd2 \
+helm install linkerd-crds linkerd/linkerd-crds \
+  -n linkerd --create-namespace
+  
+helm install linkerd-control-plane \
+  -n linkerd \
   --set-file identityTrustAnchorsPEM=ca.crt \
   --set-file identity.issuer.tls.crtPEM=issuer.crt \
-  --set-file identity.issuer.tls.keyPEM=issuer.key \
+  --set-file identity.issuer.tls.keyPEM=issuer-private.pem \
   --set identity.issuer.crtExpiry=$exp \
-  linkerd/linkerd2
+  linkerd/linkerd-control-plane
+
+helm install linkerd-viz -n linkerd-viz \
+  --create-namespace linkerd/linkerd-viz \
+  --set enforcedHostRegexp=.*
+
+# set dashboard to NodePort

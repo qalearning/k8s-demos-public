@@ -15,7 +15,6 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  creationTimestamp: null
   labels:
     app: stateful
   name: stateful
@@ -34,4 +33,3 @@ spec:
       containers:
       - image: danielives/simple-app:v1
         name: simple-app
-        resources: {}
