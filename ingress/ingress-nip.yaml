@@ -7,7 +7,7 @@ metadata:
   namespace: default
 spec:
   rules:
-    - host: internal.192.168.1.125.nip.io
+    - host: internal.34.250.191.67.nip.io
       http:
         paths:
           - backend:
@@ -17,7 +17,7 @@ spec:
                   number: 80
             path: /
             pathType: ImplementationSpecific
-    - host: external.192.168.1.125.nip.io
+    - host: external.34.250.191.67.nip.io
       http:
         paths:
           - backend:

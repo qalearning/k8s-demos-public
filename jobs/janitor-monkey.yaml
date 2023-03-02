@@ -48,6 +48,6 @@ spec:
             args:
               - "-c"
               - "kubectl delete job $(kubectl get job -o=jsonpath='{.items[?(@.status.succeeded==1)].metadata.name}')"
-              # should status.succeeded==status.completions or something...
+              # should be status.succeeded==status.completions or something...
           restartPolicy: OnFailure
   schedule: '* * * * *' # once per minute (for demo purposes)

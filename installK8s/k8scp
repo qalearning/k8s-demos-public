@@ -1,6 +1,6 @@
 #!/bin/bash
-export K8S_VERSION=1.23 #specify a version
-export CP_ADDRESS=10.0.2.10 #make sure this matches your CP node internal address
+export K8S_VERSION=1.24 #specify a version
+export CP_ADDRESS=10.0.136.14 #make sure this matches your CP node internal address
 # Bring node to current versions
 sudo apt-get update && sudo apt-get upgrade -y
 
@@ -26,7 +26,7 @@ sudo apt install containerd -y
 # Add Kubernetes repo and software 
 sudo sh -c "echo 'deb http://apt.kubernetes.io/ kubernetes-xenial main' >> /etc/apt/sources.list.d/kubernetes.list"
 
-curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+curl -s https://packages.cloud.google.com/apt/doc/rpm-package-key.gpg | sudo apt-key add -
 
 sudo apt-get update
 
@@ -64,7 +64,7 @@ echo "Apply Calico network plugin from ProjectCalico.org"
 echo "If you see an error they may have updated the yaml file"
 echo "Use a browser, navigate to the site and find the updated file"
 
-kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/master/manifests/calico.yaml
 
 echo
 

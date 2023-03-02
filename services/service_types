@@ -9,6 +9,7 @@ pe "kubectl get svc myapp"
 pe 'IP=$(kubectl get svc myapp --no-headers -o=custom-columns=ip:.spec.clusterIP)'
 pe 'curl -w "\n" $IP'
 pe "kubectl run tmp01 --image=tutum/dnsutils -- sleep infinity"
+pei "kubectl wait --for=condition=ready pod tmp01"
 pe "kubectl exec -it tmp01 -- nslookup myapp"
 pe "kubectl delete svc myapp"
 pe "kubectl expose deploy myapp --type=NodePort"
