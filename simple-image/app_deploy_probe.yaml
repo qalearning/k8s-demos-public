@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - image: danielives/simple-app:v1
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         name: myapp
         ports: [containerPort: 8080]
         resources: {}

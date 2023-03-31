@@ -12,3 +12,4 @@ spec:
     - 'i=0; while true; do echo $i: $(date) >> /var/log/logger.log; i=$((i+1)); sleep 5; done'
     image: busybox
     name: logger
+      

@@ -17,5 +17,5 @@ spec:
         app: simple-app
     spec:
       containers:
-      - image: danielives/helloworld:v2
+      - image: danielives/simple-app:v2
         name: simple-app
