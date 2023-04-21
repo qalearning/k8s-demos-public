@@ -1,0 +1,3 @@
+#!/bin/bash
+helm install myweb bitnami/apache \
+    --set service.type=NodePort

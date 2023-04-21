@@ -1,0 +1,3 @@
+kubectl get namespace "linkerd" -o json \
+  | tr -d "\n" | sed "s/\"finalizers\": \[[^]]\+\]/\"finalizers\": []/" \
+  | kubectl replace --raw /api/v1/namespaces/linkerd/finalize -f -

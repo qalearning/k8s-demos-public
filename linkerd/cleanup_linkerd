@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#uninstall viz - will result in errors
+linkerd viz uninstall | kubectl delete -f -
+
+#force delete the viz namespace
+kubectl get namespace "linkerd-viz" -o json \
+  | tr -d "\n" | sed "s/\"finalizers\": \[[^]]\+\]/\"finalizers\": []/" \
+  | kubectl replace --raw /api/v1/namespaces/linkerd-viz/finalize -f -
+
+#uninstall linkerd - will also result in errors
+linkerd uninstall | kubectl delete -f -
+
+#force delete linkerd namespace
+kubectl get namespace "linkerd" -o json \
+  | tr -d "\n" | sed "s/\"finalizers\": \[[^]]\+\]/\"finalizers\": []/" \
+  | kubectl replace --raw /api/v1/namespaces/linkerd/finalize -f -
+
+#remove linkerd
+rm -r ~/.linkerd
+
+#download the installer script
+wget run.linkerd.io/install
+#edit the script to get 2.12.1 instead of 2.13.1
+#some-sed-magic
+#bash ./install
+#follow the rest of the instructions
