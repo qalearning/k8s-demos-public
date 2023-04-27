@@ -6,7 +6,7 @@ metadata:
   name: myapp
 spec:
   nodeSelector:
-    highmem: true
+    highmem: "true"
   containers:
   - image: danielives/simple-app:v1
     name: myapp
