@@ -5,7 +5,7 @@ metadata:
     app: myapp
   name: myapp
 spec:
-  nodeName: dansnode
+  nodeName: worker
   containers:
   - image: danielives/simple-app:v1
     name: myapp

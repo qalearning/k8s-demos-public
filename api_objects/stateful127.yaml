@@ -1,8 +1,11 @@
 apiVersion: apps/v1
-kind: DaemonSet
+kind: StatefulSet
 metadata:
   name: hello
 spec:
+  ordinals:
+    start: 5
+  replicas: 3
   selector:
     matchLabels:
       app: hello

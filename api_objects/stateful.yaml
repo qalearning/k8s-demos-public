@@ -1,11 +1,8 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  labels:
-    app: hello
   name: hello
 spec:
-  serviceName: ssdemo
   replicas: 3
   selector:
     matchLabels:
@@ -18,4 +15,3 @@ spec:
       containers:
       - image: danielives/helloworld:v1
         name: hello-world
-        resources: {}

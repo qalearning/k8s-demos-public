@@ -1,0 +1,5 @@
+#!/bin/bash
+sudo apt install pv -y
+cd ~
+git clone https://github.com/mjbright/k1spy.git
+./k1spy/pip_install_kubernetes.sh

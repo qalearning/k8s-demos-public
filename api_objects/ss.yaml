@@ -26,7 +26,6 @@ spec:
       app: stateful
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: stateful
     spec:
