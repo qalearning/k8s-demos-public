@@ -19,6 +19,24 @@ helm install linkerd-control-plane \
 
 helm install linkerd-viz -n linkerd-viz \
   --create-namespace linkerd/linkerd-viz \
-  --set enforcedHostRegexp=.*
+  --set dashboard.enforcedHostRegexp=.*
 
 # set dashboard to NodePort
+kubectl patch service \
+  web --namespace linkerd-viz \
+  --type='json' \
+  -p='[{"op": "replace", "path": "/spec/type", "value": "NodePort" }]'
+# set NodePort to 32500
+kubectl patch service \
+  web --namespace linkerd-viz \
+  --type='json' \
+  -p='[{"op": "replace", "path": "/spec/ports/0/nodePort", "value": 31500 }]'
+
+#install linkerd cli
+curl -sL https://run.linkerd.io/install | sh
+echo 'export PATH=$PATH:~/.linkerd2/bin' >> ~/.bashrc
+source ~/.bashrc
+
+#install smi
+helm repo add l5d-smi https://linkerd.github.io/linkerd-smi
+helm install l5d-smi/linkerd-smi --generate-name

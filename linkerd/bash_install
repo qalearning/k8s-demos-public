@@ -1,7 +1,7 @@
 #!/bin/bash
 curl -sL https://run.linkerd.io/install | sh
 
-export PATH=$PATH:/home/ubuntu/.linkerd2/bin
+echo "export PATH=$PATH:~/.linkerd2/bin" >> ~/.bashrc
 
 linkerd check --pre
 

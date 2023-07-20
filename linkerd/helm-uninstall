@@ -1,0 +1,4 @@
+#!/bin/bash
+helm uninstall linkerd-viz -n linkerd-viz
+helm uninstall linkerd-control-plane -n linkerd
+helm uninstall linkerd-crds -n linkerd

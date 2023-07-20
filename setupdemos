@@ -3,3 +3,6 @@ sudo apt install pv -y
 cd ~
 git clone https://github.com/mjbright/k1spy.git
 ./k1spy/pip_install_kubernetes.sh
+
+git config --global user.email "dives@qa.com"
+git config --global user.name "Daniel"
