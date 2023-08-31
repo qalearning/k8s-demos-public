@@ -8,19 +8,19 @@ pe "kubectl create ns $NS"
 
 pe 'kubectl -n '$NS' run app --image busybox -- /bin/sh -c '"'"'i=0; while true; do echo $i: $(date); i=$((i+1)); sleep 5; done'"'"
 
-pe "kubectl -n $NS run kubectl --image=bitnami/kubectl:1.23 --command -- sh -c 'sleep 1d'"
+pe "kubectl -n $NS run kubectlpod --image=bitnami/kubectl:1.27 --command -- sh -c 'sleep 1d'"
 
-pei "kubectl wait --for=condition=ready pod kubectl --namespace $NS"
+pei "kubectl wait --for=condition=ready pod kubectlpod --namespace $NS"
 
 pe "kubectl -n $NS logs app"
 
-pe "kubectl -n $NS exec kubectl -it -- kubectl -n $NS logs app"
+pe "kubectl -n $NS exec kubectlpod -it -- kubectl -n $NS logs app"
 
 pe "less role.yaml"
 pe "less rolebinding.yaml"
 pe "kubectl create -f role.yaml"
 pe "kubectl create -f rolebinding.yaml"
 
-pe "kubectl -n $NS exec kubectl -it -- kubectl -n $NS logs app"
+pe "kubectl -n $NS exec kubectlpod -it -- kubectl -n $NS logs app"
 
 pe "kubectl delete ns $NS"
