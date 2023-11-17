@@ -1,0 +1,11 @@
+metadata:
+  name: kustomize-demo
+namespace: prod
+namePrefix: production-
+commonLabels:
+  env: prod
+
+resources:
+- ../../base
+patches:
+- path: deployment.yaml

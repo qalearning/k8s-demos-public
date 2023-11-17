@@ -5,6 +5,8 @@ clear
 
 export NS=demo
 
+pe "kubectl create namespace $NS"
+
 pe "kubectl -n $NS apply -f depv1.yaml"
 
 pe "kubectl -n $NS set image deployments.app/simple-app simple-app=danielives/simple-app:v2"
