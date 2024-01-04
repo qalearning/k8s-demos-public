@@ -1,0 +1,18 @@
+# Virtual environment
+.env
+.venv/
+venv/
+
+# Docker
+docker-compose.yml
+Dockerfile
+.docker
+.dockerignore
+
+# local testing
+client.py
+server
+
+# Byte-compiled / optimized / DLL files
+**/__pycache__/
+**/*.py[cod]

@@ -7,4 +7,4 @@ spec:
     runAsNonRoot: true
   containers:
   - name: nginx
-    image: nginxinc/nginx-unprivileged
+    image: public.ecr.aws/nginx/nginx-unprivileged:bookworm-perl

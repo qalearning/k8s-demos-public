@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: example
+  namespace: default
+spec:
+  completions: 3
+  template:
+    spec:
+      initContainers:
+      - name: busybox
+        image: busybox
+        command:
+          - echo
+          - initialized
+      containers:
+      - name: resting
+        image: busybox
+        command: ["/bin/sleep"]
+        args: ["3"]
+      restartPolicy: OnFailure

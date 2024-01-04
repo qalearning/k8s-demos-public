@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+enum Category {
+    BOOK = 0;
+    CD = 1;
+    DVD = 2;
+}
+
+message ProductListRequest {
+    Category category = 1;
+    int32 max_results = 2;
+}
+
+message Product {
+    int32 id = 1;
+    string name = 2;
+    float price = 3;
+}
+
+message ProductListResponse {
+    repeated Product products = 1;
+}
+
+service Products {
+    rpc ListProducts (ProductListRequest) returns (ProductListResponse);
+}

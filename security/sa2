@@ -8,7 +8,7 @@ pe "kubectl create ns $NS"
 
 pe 'kubectl -n '$NS' run app --image busybox -- /bin/sh -c '"'"'i=0; while true; do echo $i: $(date); i=$((i+1)); sleep 5; done'"'"
 
-pe "kubectl -n $NS run kubectl --image=bitnami/kubectl:1.23 --command -- sh -c 'sleep 1d'"
+pe "kubectl -n $NS run kubectl --image=bitnami/kubectl:1.27 --command -- sh -c 'sleep 1d'"
 
 pei "kubectl wait --for=condition=ready pod kubectl --namespace $NS"
 

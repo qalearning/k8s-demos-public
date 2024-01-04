@@ -15,6 +15,7 @@ helm install linkerd-control-plane \
   --set-file identity.issuer.tls.crtPEM=issuer.crt \
   --set-file identity.issuer.tls.keyPEM=issuer-private.pem \
   --set identity.issuer.crtExpiry=$exp \
+  --set identity.issuer.scheme=kubernetes.io/tls \
   linkerd/linkerd-control-plane
 
 helm install linkerd-viz -n linkerd-viz \
@@ -40,3 +41,5 @@ source ~/.bashrc
 #install smi
 helm repo add l5d-smi https://linkerd.github.io/linkerd-smi
 helm install l5d-smi/linkerd-smi --generate-name
+
+#still a problem with TAP though. Certs I think.

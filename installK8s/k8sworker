@@ -1,6 +1,6 @@
 #!/bin/bash
 export K8S_VERSION=1.27 #specify a version
-export CP_ADDRESS=10.0.136.213 #make sure this matches your CP node internal address
+export CP_ADDRESS= #make sure this matches your CP node internal address
 # Bring node to current versions
 sudo apt-get update && sudo apt-get upgrade -y
 
@@ -36,7 +36,7 @@ sudo systemctl restart containerd
 # Add Kubernetes repo and software 
 sudo sh -c "echo 'deb http://apt.kubernetes.io/ kubernetes-xenial main' >> /etc/apt/sources.list.d/kubernetes.list"
 
-curl -s https://packages.cloud.google.com/apt/doc/rpm-package-key.gpg | sudo apt-key add -
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpgvim run   | sudo apt-key add -
 
 sudo apt-get update
 

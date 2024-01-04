@@ -9,17 +9,6 @@ TIMEOUT=5
 WS_IMAGE="httpd"
 NS_NAME=demo
 
-pause() {
-  echo 
-  read -p "Press enter to continue"
-}
-
-message() {
-  echo
-  echo $1
-  echo
-}
-
 pei "# NodePort vs ClusterIP"
 pe "kubectl create namespace $NS_NAME"
 
@@ -54,7 +43,7 @@ pe "kubectl -n $NS_NAME expose pod $WS_NAME"
 
 pe "kubectl -n $NS_NAME get svc,ep"
 
-pe "kubectl -n $NS_NAME exec $C_NAME -- curl -s nginx"
+pe "kubectl -n $NS_NAME exec $C_NAME -- curl -s $WS_NAME"
 
 pei "# But I still can't get to it from outside the cluster..."
 
@@ -74,12 +63,8 @@ PORT_NUMBER=$(kubectl -n $NS_NAME get svc $WS_NAME -o=custom-columns=ip:.spec.po
 
 pe "curl -s localhost:$PORT_NUMBER"
 
-pe "kubectl -n $NS_NAME exec $C_NAME -- curl -s nginx"
+pe "kubectl -n $NS_NAME exec $C_NAME -- curl -s $WS_NAME"
 
 pe "# Cleanup"
-
-pei "kubectl -n $NS_NAME delete svc $WS_NAME"
-
-pei "kubectl -n $NS_NAME delete pods $C_NAME $WS_NAME"
 
 pei "kubectl delete namespace $NS_NAME"

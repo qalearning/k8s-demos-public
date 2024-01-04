@@ -1,0 +1,63 @@
+#!/bin/bash
+#Step 1 "Find the dashboard chart":
+
+cd~
+helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/ 
+helm fetch kubernetes-dashboard/kubernetes-dashboard --untar
+cd kubernetes-dashboard
+
+#Step 2 "Edit the values.yaml file":
+#Line 83:
+#change "- localhost" to "- dash.<CP-Public-IP>.nip.io"
+
+#Line 272ish:
+#  metrics-server:
+#    enabled: false
+
+#Line 280ish:
+#  cert-manager:
+#    enabled: true
+#    installCRDs: true
+
+#Line 296ish
+#  nginx:        
+#    enabled: false
+
+#Step 3: install the chart:
+
+#helm install dashboard .
+
+#Ignore the "Error: INSTALLATION FAILED:" if you see it. I think that's just a timing thing.
+
+#Step 4: give it perms:
+
+#The bit after "default:" needs to match your sa name which it doesn't in the PDF:
+
+# kubectl create clusterrolebinding dashaccess \
+#   --clusterrole=cluster-admin \
+#   --serviceaccount=default:dashboard-kubernetes-dashboard
+
+# Step 5: "browse to it":
+
+# Do a kubectl get svc:
+
+# myingress-ingress-nginx-controller             LoadBalancer   10.109.179.169   <pending>     80:31364/TCP,443:31440/TCP
+
+# Note the NodePort for 443, 31400 in this case
+
+# Do kubectl get ing
+
+# NAME                   CLASS   HOSTS                        ADDRESS   PORTS     AGE
+# kubernetes-dashboard   nginx   dash.18.134.248.228.nip.io             80, 443   84s
+
+# Point your browser at https://<host>:<nodeport>, https://dash.18.134.248.228.nip.io:31400 in this case
+
+# You'll get a certificate warning. Type "thisisunsafe" (in Chrome - check other browsers. OK in Edge, click "Advanced, then "go to dash.blah.nip.io" In Firefox, took me a few goes, but the "Advanced", then "accept risk and continue" eventually worked. Don't use a Mac so no idea with Safari)
+
+# Step 6:
+
+# Back on your CP node, create the token (again check the sa name):
+
+# kubectl create token dashboard-kubernetes-dashboard
+
+# Paste the output into the web page and revel in your dashboarding prowess!

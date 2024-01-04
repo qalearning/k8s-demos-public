@@ -3,8 +3,8 @@ kind: ClusterConfig
 metadata:
   name: dev-cluster
   region: eu-west-2
-  version: "1.22"
-availabilityZones:
+  version: "1.27"
+availabilityZones: 
   - eu-west-2a
   - eu-west-2b
   - eu-west-2c

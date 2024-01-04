@@ -1,0 +1,3 @@
+#!/bin/bash
+export GRPC_VERBOSITY=DEBUG
+python3 products.py 

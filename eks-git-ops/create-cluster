@@ -1,17 +1,18 @@
 #!/bin/bash
 export AWS_REGION=eu-west-2
+export CLUSTER=dev-cluster
 #create cluster
 eksctl create cluster -f cluster.yaml --kubeconfig ~/.kube/config-dev-cluster
 
 export CLUSTER_EP=$(aws eks describe-cluster \
     --region $AWS_REGION \
-    --name dev-cluster \
+    --name $CLUSTER \
     --query "cluster.endpoint" \
     --output text)
 
 export CA=$(aws eks describe-cluster \
     --region $AWS_REGION \
-    --name dev-cluster \
+    --name $CLUSTER \
     --query "cluster.certificateAuthority.data" \
     --output text)
 
@@ -40,7 +41,7 @@ users:
         - "eks"
         - "get-token"
         - "--cluster-name"
-        - "dev-cluster"
+        - "$CLUSTER"
         # - "--role-arn"
         # - "role-arn"
       # env:
@@ -80,12 +81,12 @@ helm upgrade -i helm-operator fluxcd/helm-operator \
   --namespace flux
 
 #install fluxctl
-#sudo wget -O /usr/local/bin/fluxctl $(curl https://api.github.com/repos/fluxcd/flux/releases/latest | jq -r ".assets[] | select(.name | test(\"linux_amd64\")) | .browser_download_url")
-#sudo chmod 755 /usr/local/bin/fluxctl
+sudo wget -O /usr/local/bin/fluxctl $(curl https://api.github.com/repos/fluxcd/flux/releases/latest | jq -r ".assets[] | select(.name | test(\"linux_amd64\")) | .browser_download_url")
+sudo chmod 755 /usr/local/bin/fluxctl
 
 eksctl create iamidentitymapping \
-    --cluster dev-cluster \
-    --region=eu-west-2 \
+    --cluster $CLUSTER \
+    --region=$REGION \
     --arn arn:aws:iam::719529402288:user/dan-console \
     --group eks-console-dashboard-full-access-group \
     --no-duplicate-arns
