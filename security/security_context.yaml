@@ -7,4 +7,4 @@ spec:
     runAsNonRoot: true
   containers:
   - name: nginx
-    image: public.ecr.aws/nginx/nginx:stable-alpine
+    image: nginx

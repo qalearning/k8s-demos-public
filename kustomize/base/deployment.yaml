@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: the-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      deployment: hello
+  template:
+    metadata:
+      labels:
+        deployment: hello
+    spec:
+      containers:
+      - name: the-container
+        image: danielives/helloworld:v1
+        ports:
+        - containerPort: 80
+        env:
+        - name: ALT_GREETING
+          valueFrom:
+            configMapKeyRef:
+              name: the-map
+              key: altGreeting
+        - name: ENABLE_RISKY
+          valueFrom:
+            configMapKeyRef:
+              name: the-map
+              key: enableRisky

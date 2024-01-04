@@ -1,0 +1,12 @@
+metadata:
+  name: kustomize-demo
+namespace: dev
+namePrefix: development-
+commonLabels:
+  env: dev
+
+resources:
+- ../../base
+patches:
+- path: service.yaml
+- path: cm.yaml
