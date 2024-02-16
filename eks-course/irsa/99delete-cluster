@@ -1,0 +1,5 @@
+#!/bin/bash
+export AWS_REGION=eu-west-2
+export CLUSTER=dev-cluster
+
+eksctl delete cluster $CLUSTER

@@ -1,0 +1,45 @@
+#!/bin/bash
+
+. ../../demo-magic.sh
+clear
+
+NS=eks-pod-id-demo
+ROLENAME=aws-s3-read-pod-id
+CLUSTER=dev-cluster
+ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
+SANAME=$ROLENAME
+
+pe "kubectl create ns $NS"
+
+pe "kubectl -n $NS run awsclipod --image=public.ecr.aws/aws-cli/aws-cli:latest --command -- sh -c 'sleep 1d'"
+
+pei "kubectl wait --for=condition=ready pod awsclipod --namespace $NS"
+
+pe "kubectl -n $NS exec awsclipod -it -- aws s3 ls"
+
+p "# nope!"
+
+pe "kubectl -n $NS delete pod awsclipod"
+
+pe "less trust-relationship.json"
+pe "aws iam create-role --role-name $ROLENAME --assume-role-policy-document file://trust-relationship.json"
+
+pe "aws iam attach-role-policy --role-name $ROLENAME --policy-arn=arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+
+pe "aws eks create-pod-identity-association --cluster-name $CLUSTER --role-arn arn:aws:iam::$ACCOUNT:role/$ROLENAME --namespace $NS --service-account $SANAME"
+
+pe "aws eks create-addon --cluster-name $CLUSTER --addon-name eks-pod-identity-agent --addon-version v1.0.0-eksbuild.1"
+
+pe "aws eks wait addon-active --region $REGION --cluster $CLUSTER --addon-name eks-pod-identity-agent"
+
+pe "kubectl -n $NS create serviceaccount $SANAME"
+pe "kubectl -n $NS run awsclipod \
+  --image=public.ecr.aws/aws-cli/aws-cli:latest \
+  --overrides='{ "\""spec"\"": { "\""serviceAccount"\"": "\""$SANAME"\"" }  }' \
+  --command -- sh -c 'sleep 1d'"
+pei "kubectl wait --for=condition=ready pod awsclipod --namespace $NS"
+pe "kubectl -n $NS exec awsclipod -it -- aws s3 ls"
+
+pe "aws iam detach-role-policy --role-name $ROLENAME --policy-arn=arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+pei "aws iam delete-role --role-name $ROLENAME"
+pei "kubectl delete ns $NS"

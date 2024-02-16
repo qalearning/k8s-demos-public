@@ -1,0 +1,35 @@
+#!/bin/bash
+
+. ../../demo-magic.sh
+clear
+
+NS=demo
+REGION=eu-west-2
+
+pe "kubectl create ns $NS"
+
+pe "kubectl -n $NS run awsclipod --image=public.ecr.aws/aws-cli/aws-cli:latest --command -- sh -c 'sleep 1d'"
+
+pei "kubectl wait --for=condition=ready pod awsclipod --namespace $NS"
+
+pe "kubectl -n $NS exec awsclipod -it -- aws s3 ls"
+
+p "# nope!"
+
+pe "kubectl -n $NS delete pod awsclipod"
+
+pe "eksctl utils associate-iam-oidc-provider --cluster dev-cluster --approve --region $REGION"
+
+pe "eksctl create iamserviceaccount --name aws-s3-read --namespace $NS --cluster dev-cluster --attach-policy-arn arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess --approve --region $REGION"
+
+#kubectl -n $NS run awsclipod --image=public.ecr.aws/aws-cli/aws-cli:latest --overrides='{ "spec": { "serviceAccount": "aws-s3-read" }  }' --command -- sh -c 'sleep 1d'
+
+pe "kubectl -n $NS run awsclipod \
+  --image=public.ecr.aws/aws-cli/aws-cli:latest \
+  --overrides='{ "\""spec"\"": { "\""serviceAccount"\"": "\""aws-s3-read"\"" }  }' \
+  --command -- sh -c 'sleep 1d'"
+pei "kubectl wait --for=condition=ready pod awsclipod --namespace $NS"
+pe "kubectl -n $NS exec awsclipod -it -- aws s3 ls"
+
+
+pe "kubectl delete ns $NS"

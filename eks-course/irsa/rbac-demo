@@ -1,0 +1,29 @@
+#!/bin/bash
+
+. ../../demo-magic.sh
+clear
+
+NS=demo
+pe "kubectl create ns $NS"
+
+pe 'kubectl -n '$NS' run app --image busybox -- /bin/sh -c '"'"'i=0; while true; do echo $i: $(date); i=$((i+1)); sleep 5; done'"'"
+
+pe "kubectl -n $NS run kubectlpod --image=bitnami/kubectl:1.27 --command -- sh -c 'sleep 1d'"
+
+pei "kubectl wait --for=condition=ready pod kubectlpod --namespace $NS"
+
+pe "kubectl --namespace $NS logs app"
+
+pe "kubectl --namespace $NS exec kubectlpod -it -- kubectl -n $NS logs app"
+
+pe "kubectl create role -n $NS pod-scanner --verb=get,list,watch --resource=pods,pods/log"
+pe "kubectl create rolebinding -n $NS pod-scanner-binding --role=pod-scanner --serviceaccount=demo:default"
+
+# pe "less role.yaml"
+# pe "less rolebinding.yaml"
+# pe "kubectl create -f role.yaml"
+# pe "kubectl create -f rolebinding.yaml"
+
+pe "kubectl -n $NS exec kubectlpod -it -- kubectl -n $NS logs app"
+
+pe "kubectl delete ns $NS"
