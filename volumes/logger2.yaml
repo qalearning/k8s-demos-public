@@ -17,5 +17,5 @@ spec:
       mountPath: /var/log
   volumes:
   - name: varlog
-    emptyDir: {} #ephemeral - tied to the pod's / node's lifetime
+    emptyDir: {} #ephemeral - tied to the pod's lifetime
   
