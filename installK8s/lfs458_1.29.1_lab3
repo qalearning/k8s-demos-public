@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#### 3.1.14 and 3.2.5 ####
+
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] \
+https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /" \
+| sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+#### 3.1.15 and 3.2.6  ####
+
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key \
+| sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+#### 3.1.16 and 3.2.7  ####
+
+sudo apt-get update
+
+#### 3.1.17 and 3.2.8 ####
+
+sudo apt-get install kubelet=1.28.1-1.1 kubeadm==1.28.1-1.1 kubectl=1.28.1-1.1
