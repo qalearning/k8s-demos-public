@@ -4,7 +4,8 @@ helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard
 helm install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard \
     --set protocolHttp=true \
     --set service.type=NodePort \
-    --set metricsScraper.enabled=true
+    --set metricsScraper.enabled=true \
+    --version 3.0.0
 
 kubectl create clusterrolebinding dashaccess \
     --clusterrole cluster-admin \
