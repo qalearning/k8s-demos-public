@@ -1,0 +1,27 @@
+# requires k8s >= 1.30
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: "demo-policy.example.com"
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+    - apiGroups:   ["apps"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["deployments"]
+  validations:
+    - expression: "object.spec.replicas <= 5"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: "demo-binding-test.example.com"
+spec:
+  policyName: "demo-policy.example.com"
+  validationActions: [Deny] # or Warn or Audit
+  matchResources:
+    namespaceSelector:
+      matchLabels:
+        environment: test

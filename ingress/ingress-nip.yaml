@@ -2,12 +2,13 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ingress-nip
-  annotations:
-    kubernetes.io/ingress.class: nginx
+  # annotations:
+  #   kubernetes.io/ingress.class: nginx
   namespace: default
 spec:
+  ingressClassName: nginx
   rules:
-    - host: internal.3.8.160.83.nip.io
+    - host: internal.35.177.220.104.nip.io
       http:
         paths:
           - backend:
@@ -17,7 +18,7 @@ spec:
                   number: 80
             path: /
             pathType: ImplementationSpecific
-    - host: external.3.8.160.83.nip.io
+    - host: external.35.177.220.104.nip.io
       http:
         paths:
           - backend:
