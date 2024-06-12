@@ -17,7 +17,7 @@ pe "kubectl --namespace $NS logs app"
 pe "kubectl --namespace $NS exec kubectlpod -it -- kubectl -n $NS logs app"
 
 pe "kubectl create role -n $NS pod-scanner --verb=get,list,watch --resource=pods,pods/log"
-pe "kubectl create rolebinding -n $NS pod-scanner-binding --role=pod-scanner --serviceaccount=demo:default"
+pe "kubectl create rolebinding -n $NS pod-scanner-binding --role=pod-scanner --serviceaccount=$NS:default"
 
 # pe "less role.yaml"
 # pe "less rolebinding.yaml"

@@ -11,4 +11,12 @@ linkerd check
 
 linkerd viz install | kubectl apply -f -
 
-linkerd check
+linkerd viz check
+
+INDEX=$(kubectl get deploy web -n linkerd-viz -o json  | jq '.spec.template.spec.containers[0].args | map(.name == "-enforce-host") | index(true)')
+
+kubectl patch deploy web --type=json -p="[{'op': 'remove', 'path': '.spec.template.spec.containers[0].args[$INDEX]'}]" -n linkerd-viz
+
+kubectl patch deploy web \
+    --type=json \
+    -p='[{"op":"add", "path":"/spec/template/spec/containers/0/args/-", "value":"--enforce-host="}]' -n linkerd-viz
