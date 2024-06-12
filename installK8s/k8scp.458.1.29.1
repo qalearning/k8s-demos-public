@@ -1,0 +1,40 @@
+#!/bin/bash
+sudo apt install curl apt-transport-https vim git wget software-properties-common lsb-release ca-certificates -y
+
+sudo modprobe overlay
+sudo modprobe br_netfilter
+cat << EOF | sudo tee /etc/sysctl.d/kubernetes.conf
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+net.ipv4.ip_forward = 1
+EOF
+
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update && sudo apt-get install containerd.io -y
+
+sudo containerd config default | sudo tee /etc/containerd/config.toml
+sudo sed -e 's/SystemdCgroup = false/SystemdCgroup = true/g' -i /etc/containerd/config.toml
+sudo systemctl restart containerd
+
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo apt-get update
+sudo apt-get install -y kubeadm=1.28.1-1.1 kubelet=1.28.1-1.1 kubectl=1.28.1-1.1
+sudo apt-mark hold kubeadm kubelet kubectl
+
+# the rest is CP node only
+cp /home/student/LFS458/SOLUTIONS/s_03/kubeadm-config.yaml .
+sudo kubeadm init --config=/home/student/LFS458/SOLUTIONS/s_03/kubeadm-config.yaml --upload-certs | tee kubeadm-init.out
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+kubectl apply -f /home/student/LFS458/SOLUTIONS/s_03/cilium-cni.yaml
+
+echo "source <(kubectl completion bash)" >> $HOME/.bashrc
+kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+
+kubectl get nodes && kubectl describe nodes | grep -i taint
