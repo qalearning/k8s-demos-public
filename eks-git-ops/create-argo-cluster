@@ -1,0 +1,110 @@
+#!/bin/bash
+export AWS_REGION=eu-west-2
+export CLUSTER=dev-cluster
+#create cluster
+eksctl create cluster -f cluster.yaml --kubeconfig ~/.kube/config-dev-cluster
+
+export CLUSTER_EP=$(aws eks describe-cluster \
+    --region $AWS_REGION \
+    --name $CLUSTER \
+    --query "cluster.endpoint" \
+    --output text)
+
+export CA=$(aws eks describe-cluster \
+    --region $AWS_REGION \
+    --name $CLUSTER \
+    --query "cluster.certificateAuthority.data" \
+    --output text)
+
+cat << EOF > ~/.kube/config-dev-cluster
+apiVersion: v1
+clusters:
+- cluster:
+    server: $CLUSTER_EP
+    certificate-authority-data: $CA
+  name: kubernetes
+contexts:
+- context:
+    cluster: kubernetes
+    user: aws
+  name: aws
+current-context: aws
+kind: Config
+preferences: {}
+users:
+- name: aws
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1beta1
+      command: aws
+      args:
+        - "eks"
+        - "get-token"
+        - "--cluster-name"
+        - "$CLUSTER"
+        # - "--role-arn"
+        # - "role-arn"
+      # env:
+        # - name: AWS_PROFILE
+        #   value: "aws-profile"
+EOF
+
+export KUBECONFIG=~/.kube/config-dev-cluster
+
+#install helm
+# curl -sSL https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+
+#create k8s secrets (replace with some kind of EKS / Param store mapper?)
+export GIT_AUTHUSER=$(aws ssm get-parameter --name /daniel/dev/eks/gitops/gitauthuser --with-decryption --query Parameter.Value --output text --region eu-west-2)
+export GIT_AUTHKEY=$(aws ssm get-parameter --name /daniel/dev/eks/gitops/gitauthkey --with-decryption --query Parameter.Value --output text --region eu-west-2)
+kubectl create secret generic git-auth \
+  -n default \
+  --from-literal=GIT_AUTHUSER=$GIT_AUTHUSER \
+  --from-literal=GIT_AUTHKEY=$GIT_AUTHKEY
+
+#install CRDs on cluster
+#kubectl apply -k https://github.com/argoproj/argo-cd/manifests/crds\?ref\=stable
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
+# kubectl apply -f https://raw.githubusercontent.com/fluxcd/helm-operator/master/deploy/crds.yaml
+# kubectl create namespace flux
+# helm repo add fluxcd https://charts.fluxcd.io
+
+# #install flux
+# helm upgrade -i flux fluxcd/flux \
+#   --set git.url="https://$GIT_AUTHUSER:$GIT_AUTHKEY@git-codecommit.$AWS_REGION.amazonaws.com/v1/repos/k8s-config" \
+#   --set env.secretName=flux-git-auth \
+#   --set git.branch=main \
+#   --namespace flux
+
+# #install flux helm operator
+# helm upgrade -i helm-operator fluxcd/helm-operator \
+#   --set helm.versions=v3 \
+#   --set git.ssh.secretName=flux-git-deploy \
+#   --namespace flux
+
+# #install fluxctl
+# sudo wget -O /usr/local/bin/fluxctl $(curl https://api.github.com/repos/fluxcd/flux/releases/latest | jq -r ".assets[] | select(.name | test(\"linux_amd64\")) | .browser_download_url")
+# sudo chmod 755 /usr/local/bin/fluxctl
+curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
+rm argocd-linux-amd64
+
+kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
+export NEWPWD=P@$$w0rd
+export PWDSTRING=$(argocd admin initial-password -n argocd)
+export OLDPWD=$(echo $PWDSTRING | awk '{print $1}')
+export ARGOCD_SERVER=$(kubectl get svc argocd-server -n argocd -o json | jq --raw-output '.status.loadBalancer.ingress[0].hostname')
+argocd login $ARGOCD_SERVER --username admin --password $OLDPWD --insecure
+argocd account update-password --server $ARGOCD_SERVER --account admin --current-password $OLDPWD --new-password $NEWPWD --insecure
+argocd login $ARGOCD_SERVER --username admin --password $NEWPWD --insecure
+argocd repo add https://git-codecommit.eu-west-2.amazonaws.com/v1/repos/k8s-config --username $GIT_AUTHUSER --password $GIT_AUTHKEY
+#ssh://git-codecommit.eu-west-2.amazonaws.com/v1/repos/k8s-config
+
+eksctl create iamidentitymapping \
+    --cluster $CLUSTER \
+    --region=$REGION \
+    --arn arn:aws:iam::719529402288:user/dan-console \
+    --group eks-console-dashboard-full-access-group \
+    --no-duplicate-arns

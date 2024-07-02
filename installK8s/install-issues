@@ -1,0 +1,3 @@
+#!/bin/bash
+netstat -lnp | grep 1025
+#then kill those PIDs
