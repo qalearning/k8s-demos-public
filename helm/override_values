@@ -1,3 +1,3 @@
 #!/bin/bash
-helm install myweb bitnami/apache \
+helm upgrade web bitnami/apache \
     --set service.type=NodePort

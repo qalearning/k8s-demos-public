@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pseudo-pod
+spec:
+  containers:
+  - name: main
+    image: db-image
+  initContainers:
+  - name: init1
+    image: init1
+    cmd: 'always return true, finish by putting $i at $x'
+  - name: init2
+    image: init2
+    cmd: 'always return true, finish by putting $j at $y'
+  - name: final-init
+    image: final-init
+    cmd: 'mv $x /data/dir || mv $y /data/dir || /bin/false'
+    

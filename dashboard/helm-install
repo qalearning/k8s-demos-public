@@ -1,11 +1,11 @@
 #!/bin/bash
-helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard
+helm repo add dashboard https://kubernetes.github.io/dashboard
 
-helm install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard \
+helm install kubernetes-dashboard dashboard/kubernetes-dashboard \
     --set protocolHttp=true \
     --set service.type=NodePort \
     --set metricsScraper.enabled=true \
-    --version 3.0.0
+    --version 6.0.8
 
 kubectl create clusterrolebinding dashaccess \
     --clusterrole cluster-admin \

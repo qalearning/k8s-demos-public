@@ -4,7 +4,7 @@ metadata:
   name: hello
 spec:
   ordinals:
-    start: 1
+    start: 5
   replicas: 3
   selector:
     matchLabels:

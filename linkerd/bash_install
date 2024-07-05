@@ -5,6 +5,8 @@ echo "export PATH=$PATH:~/.linkerd2/bin" >> ~/.bashrc
 
 linkerd check --pre
 
+linkerd install --crds | kubectl apply -f -
+
 linkerd install | kubectl apply -f -
 
 linkerd check
@@ -13,10 +15,17 @@ linkerd viz install | kubectl apply -f -
 
 linkerd viz check
 
-INDEX=$(kubectl get deploy web -n linkerd-viz -o json  | jq '.spec.template.spec.containers[0].args | map(.name == "-enforce-host") | index(true)')
-
-kubectl patch deploy web --type=json -p="[{'op': 'remove', 'path': '.spec.template.spec.containers[0].args[$INDEX]'}]" -n linkerd-viz
-
+INDEX=$(kubectl get deploy web -n linkerd-viz -o json | jq '.spec.template.spec.containers[0].args | map(startswith("-enforced-host")) | index(true)')
 kubectl patch deploy web \
     --type=json \
-    -p='[{"op":"add", "path":"/spec/template/spec/containers/0/args/-", "value":"--enforce-host="}]' -n linkerd-viz
+    -p='[{"op":"replace", "path":"/spec/template/spec/containers/0/args/'$INDEX'", "value":"-enforced-host="}]' -n linkerd-viz
+
+kubectl patch service \
+  web --namespace linkerd-viz \
+  --type='json' \
+  -p='[{"op": "replace", "path": "/spec/type", "value": "NodePort" }]'
+
+kubectl patch service \
+  web --namespace linkerd-viz \
+  --type='json' \
+  -p='[{"op": "replace", "path": "/spec/ports/0/nodePort", "value": 31500 }]'
