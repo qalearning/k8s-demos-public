@@ -1,0 +1,72 @@
+#!/bin/bash
+export OLD_K8S=1.29
+export NEW_K8S=1.30
+
+######### on each cp node in turn: ########
+#OPTIONAL: Backup etcd
+kubectl -n kube-system exec -it etcd-cp -- sh -c "ETCDCTL_API=3 \
+    ETCDCTL_CACERT=/etc/kubernetes/pki/etcd/ca.crt \
+    ETCDCTL_CERT=/etc/kubernetes/pki/etcd/server.crt \
+    ETCDCTL_KEY=/etc/kubernetes/pki/etcd/server.key \
+    etcdctl --endpoints=https://127.0.0.1:2379 snapshot save /var/lib/etcd/snapshot.db"
+mkdir -p $HOME/backup
+sudo cp /var/lib/etcd/snapshot.db $HOME/backup/snapshot.db-$(date +%y-%m-%d)
+sudo cp /root/kubeadm-config.yaml $HOME/backup/
+sudo cp -r /etc/kubernetes/pki/etcd $HOME/backup/
+
+#update packages
+sudo sed -i 's/'$OLD_K8S'/'$NEW_K8S'/g' /etc/apt/sources.list.d/kubernetes.list
+sudo apt-get update
+
+#release hold on kubeadm and upgrade it
+sudo apt-mark unhold kubeadm
+sudo apt-get install -y kubeadm=$NEW_K8S.1-1.1
+
+#replace cp with the other cp nodes' names if necessary
+kubectl drain cp --ignore-daemonsets
+
+#plan
+sudo kubeadm upgrade plan v$NEW_K8S.1
+
+#apply
+sudo kubeadm upgrade apply v$NEW_K8S.1
+#Say "yes" you want to apply. There is a thing we can do to pipe this to "yes" but I can't remember it
+
+#upgrade kubelet and kubectl
+sudo apt-mark unhold kubelet kubectl
+sudo apt-get install -y kubelet=$NEW_K8S.1-1.1 kubectl=$NEW_K8S.1-1.1
+sudo apt-mark hold kubelet kubectl
+
+#restart daemons
+sudo systemctl daemon-reload
+sudo systemctl restart kubelet
+
+######## for each worker node (from command host (cp in this course)) ########
+kubectl drain node worker --ignore-daemonsets
+
+######## on each worker node ########
+#update packages
+sudo sed -i 's/'$OLD_K8S'/'$NEW_K8S'/g' /etc/apt/sources.list.d/kubernetes.list
+sudo apt-get update
+
+#release hold on kubeadm and upgrade it
+sudo apt-mark unhold kubeadm
+sudo apt-get install -y kubeadm=$NEW_K8S.1-1.1
+
+#replace cp with the other cp nodes' names if necessary
+kubectl drain cp --ignore-daemonsets
+
+#upgrade nodes
+sudo kubeadm upgrade node
+
+#upgrade kubelet and kubectl
+sudo apt-mark unhold kubelet kubectl
+sudo apt-get install -y kubelet=$NEW_K8S.1-1.1 kubectl=$NEW_K8S.1-1.1
+sudo apt-mark hold kubelet kubectl
+
+#restart daemons
+sudo systemctl daemon-reload
+sudo systemctl restart kubelet
+
+######## for each worker node (from command host (cp in this course)) ########
+kubectl uncordon node worker

@@ -1,4 +1,6 @@
 #!/bin/bash
+export K8S_VERSION=1.29
+
 # Update the system
 sudo apt-get update ; sudo apt-get upgrade -y
 
@@ -7,12 +9,12 @@ sudo apt-get install curl apt-transport-https vim git wget gnupg2 software-prope
 
 # Add repo for Kubernetes
 sudo mkdir -m 755 /etc/apt/keyrings
-curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v$K8S_VERSION/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v$K8S_VERSION/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
 # Install the Kubernetes software, and lock the version
 sudo apt-get update
-sudo apt-get -y install kubelet=1.29.1-1.1 kubeadm=1.29.1-1.1 kubectl=1.29.1-1.1
+sudo apt-get -y install kubelet=$K8S_VERSION.1-1.1 kubeadm=$K8S_VERSION.1-1.1 kubectl=$K8S_VERSION.1-1.1
 sudo apt-mark hold kubelet kubeadm kubectl
 
 # Ensure Kubelet is running
@@ -56,16 +58,7 @@ sudo sed -e 's/SystemdCgroup = false/SystemdCgroup = true/g' -i /etc/containerd/
 sudo systemctl restart containerd
 sudo systemctl enable containerd
 
-# Install and configure crictl
-export VER="v1.26.0"
-
-wget https://github.com/kubernetes-sigs/cri-tools/releases/download/$VER/crictl-$VER-linux-amd64.tar.gz
-
-tar zxvf crictl-$VER-linux-amd64.tar.gz
-
-sudo mv crictl /usr/local/bin
-
-# Set the endpoints to avoid the deprecation error
+# Set the endpoints to containerd instead of docker
 sudo crictl config --set \
 runtime-endpoint=unix:///run/containerd/containerd.sock \
 --set image-endpoint=unix:///run/containerd/containerd.sock
