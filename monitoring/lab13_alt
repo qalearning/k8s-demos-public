@@ -1,0 +1,16 @@
+#!/bin/bash
+#YAMLfest in course tarball uses the "recommended.yaml" from the below location
+kubectl apply -f \
+  https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/alternative.yaml
+
+#this gives us a clusterIP, so patch it:
+kubectl patch service \
+  kubernetes-dashboard --namespace kubernetes-dashboard \
+  --type='json' \
+  -p='[{"op": "replace", "path": "/spec/type", "value": "NodePort" }]'
+
+  #and if you want to skip token authentication:
+kubectl patch deployment \
+  kubernetes-dashboard --namespace kubernetes-dashboard \
+  --type='json' \
+  -p='[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--enable-skip-login"}]'

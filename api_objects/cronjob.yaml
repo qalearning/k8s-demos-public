@@ -6,6 +6,7 @@ spec:
   schedule: "* * * * *"
   jobTemplate:
     spec:
+      completions: 3
       template:
         spec:
           containers:

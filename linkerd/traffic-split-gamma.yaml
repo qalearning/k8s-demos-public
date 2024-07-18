@@ -1,0 +1,26 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+# w-i-p
+metadata:
+  name: demo-split
+  namespace: ts-demo
+spec:
+  service: demo-split
+  backends:
+  - service: myapp
+    weight: 1000
+  - service: myapp2
+    weight: 500
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-split
+  namespace: ts-demo
+spec:
+  ports:
+  - name: http
+    port: 80
+  selector:
+    app: myapp
+  type: NodePort

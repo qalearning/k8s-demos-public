@@ -53,9 +53,6 @@ sudo apt-get update
 sudo apt-mark unhold kubeadm
 sudo apt-get install -y kubeadm=$NEW_K8S.1-1.1
 
-#replace cp with the other cp nodes' names if necessary
-kubectl drain cp --ignore-daemonsets
-
 #upgrade nodes
 sudo kubeadm upgrade node
 
