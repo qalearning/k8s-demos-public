@@ -4,7 +4,7 @@
 echo ================================================================
 echo add GPG key and add Kubernetes Repo 
 echo ================================================================
-sudo mkdir -m -p 755 /etc/apt/keyrings
+sudo mkdir  -p -m 755 /etc/apt/keyrings
 curl -fsSL https://pkgs.k8s.io/core:/stable:/v$VER/deb/Release.key | sudo gpg --dearmor | sudo tee /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v$VER/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
