@@ -30,11 +30,7 @@ wget https://cm.lf.training/LFS458/LFS458_V1.30.1_SOLUTIONS.tar.xz --user=LFtrai
 # wget https://cm.lf.training/LFD459/LFD459_V1.30.1_SOLUTIONS.tar.xz --user=LFtraining --password=Penguin2014
 tar -xf *SOL*
 
-bash ./setup-vm
-
-bash ./install-cntrd
-
-bash ./install-k8s
+bash ./common-setup
 
 echo ================================================================
 echo Set hostname and add CNI Container Network Interface.

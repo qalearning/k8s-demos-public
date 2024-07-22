@@ -1,0 +1,4 @@
+#!/bin/bash
+bash ./setup-vm
+bash ./install-cntrd
+bash ./install-k8s
