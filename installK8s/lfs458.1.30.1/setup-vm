@@ -1,0 +1,27 @@
+#!/bin/bash
+echo ================================================================
+echo Installing general stuff and setting up the machine
+echo ================================================================
+
+sudo apt-get update 
+sudo apt-get upgrade -y
+sudo apt-get install -y vim nano curl apt-transport-https git wget software-properties-common lsb-release ca-certificates
+
+# disable swap and ensure kernel has modules
+sudo swapoff -a
+sudo modprobe overlay
+sudo modprobe br_netfilter
+
+echo ================================================================
+echo Setting up iptables and sysctl
+echo ================================================================
+# The next command benefits from the earlier sudo -i otherwise you would also 
+# need to sudo the tee command.
+cat << EOF | tee /etc/sysctl.d/kubernetes.conf
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+net.ipv4.ip_forward = 1
+EOF
+echo "--- start of output from systctl --system ---"
+sysctl --system
+echo "--- end of output from systctl --system ---"

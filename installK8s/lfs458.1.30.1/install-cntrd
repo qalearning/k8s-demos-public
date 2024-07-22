@@ -1,0 +1,44 @@
+#!/bin/bash
+export K8S_VERSION=1.29
+
+# Configure containerd settings
+
+echo ================================================================
+echo Setting up keyrings
+echo ================================================================
+# Install the containerd software
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+echo ================================================================
+echo Adding containerd
+echo ================================================================
+
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+sudo apt-get update && sudo apt-get install containerd.io -y
+
+echo ================================================================
+echo Configuring containerd
+echo ================================================================
+# Configure containerd and restart
+sudo mkdir -p /etc/containerd
+sudo containerd config default | sudo tee /etc/containerd/config.toml
+sudo sed -e 's/SystemdCgroup = false/SystemdCgroup = true/g' -i /etc/containerd/config.toml
+
+cat <<EOF | sudo tee /etc/modules-load.d/containerd.conf
+overlay
+br_netfilter
+EOF
+
+sudo sysctl --system
+
+sudo systemctl restart containerd
+sudo systemctl enable containerd
+
+# Set the endpoints to containerd instead of docker
+sudo crictl config --set \
+runtime-endpoint=unix:///run/containerd/containerd.sock \
+--set image-endpoint=unix:///run/containerd/containerd.sock
+
+echo ================================================================
+echo Containerd installed and configured
+echo ================================================================

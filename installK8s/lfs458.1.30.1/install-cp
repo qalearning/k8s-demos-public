@@ -1,0 +1,115 @@
+#!/bin/bash
+
+# Install the Control Plane for LFS458 v1.29.1 (for 1.30 course) - July 2024
+# Create an Ubuntu machine (min 2 vCPU) or use the CFN template.
+# J.Watkins - QA
+# and
+# D.Ives    - QA
+#
+# student$> chmod +x install-cp
+# student$> ./install-cp
+#
+
+# prevent Ubuntu from displaying interactive prompts 
+export DEBIAN_FRONTEND=noninteractive
+export INSTALL_NFS=False
+export NETWORKPLUGIN=Cilium
+
+# Use the correct version of the cluster. Usually 1 version behind 
+# so that students can upgrade in lab 4. use 'sudo apt-cache madison kubeadm'
+# to see versions available.
+
+export VER=1.29      # Jul 2024
+#          1.28.1    # Mar 2024
+#          1.27.1    # Oct 2023
+#          1.26.1    # Jul 2023
+#          1.18.1-00 # Dec 2020
+
+# fetch the tarballs for LFS458 and / or LFD459:
+wget https://cm.lf.training/LFD459/LFD459_V1.30.1_SOLUTIONS.tar.xz --user=LFtraining --password=Penguin2014
+# wget https://cm.lf.training/LFD459/LFD459_V1.30.1_SOLUTIONS.tar.xz --user=LFtraining --password=Penguin2014
+tar -xf *SOL*
+
+./setup-vm
+
+./install-cntrd
+
+./install-k8s
+
+echo ================================================================
+echo Set hostname and add CNI Container Network Interface.
+echo ================================================================
+echo `hostname -i` k8scp  >> /etc/hosts
+
+echo ================================================================
+echo Initialise the CP:
+echo ================================================================
+sudo kubeadm init --config=kubeadm-config.yaml --upload-certs | tee kubeadm-init.out 
+#( tee saves output for future review)
+
+cat << EOF | tee kubeadm-config.yaml
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: ClusterConfiguration
+kubernetesVersion: $VER
+controlPlaneEndpoint: "k8scp:6443"
+networking:
+  podSubnet: 192.168.0.0/16
+---
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+serverTLSBootstrap: true
+EOF
+# the KubeletConfiguration above saves having to patch the metrics-server later
+# you'll need to run:
+# kubectl certificate approve $(kubectl get csr --output=name)"
+#   once all nodes are joined.
+# see https://particule.io/en/blog/kubeadm-metrics-server/
+          
+sudo mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+echo ================================================================
+echo Install CNI Container Network Interface plugin.
+echo ================================================================
+
+# === Calico was used up to 1.27 inclusive. No longer used in LFS458 v1.28 
+if (( $NETWORKPLUGIN == 'Calico' )); then
+	kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/calico.yaml
+	sleep 10
+else
+    # === From 1.28.1, lab uses Cilium instead
+    kubectl apply -f $HOME/LFS458/SOLUTIONS/s_03/cilium-cni.yaml
+fi
+
+kubectl get nodes
+echo ================================================================
+echo
+echo Install of Kubernetes $VER control plane is done. 
+echo Hostname is `hostname -i`
+echo 
+echo Run the following command on the worker nodes to add /etc/hosts on the workers
+echo "sudo echo `hostname -i` cp k8scp | sudo tee -a /etc/hosts"
+echo
+echo Now install the worker node(s). 
+echo
+echo "source <(kubectl completion bash)"        >> $HOME/.bashrc
+echo "alias k=kubectl"                          >> $HOME/.bashrc
+echo "complete -o default -F __start_kubectl k" >> $HOME/.bashrc
+echo "set expandtab" >>  $HOME/.vimrc
+echo "set tabstop=2" >>  $HOME/.vimrc
+source ~/.bashrc
+echo
+echo ================================================================
+
+if (( $INSTALL_NFS == 'True' )); then
+  echo ================================================================
+  echo set up NFS as well:
+  echo ================================================================
+  sudo apt-get install -y nfs-kernel-server
+  sudo mkdir /opt/shakespeare
+  sudo chmod 1777 /opt/shakespeare
+  echo "/opt/shakespeare/ *(rw,sync,no_root_squash,subtree_check)" | sudo tee > /etc/exports
+  sudo exportfs -ra
+  echo "not here" | sudo tee > /opt/shakespeare/wheres-william.txt
+fi

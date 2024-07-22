@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# Install the Worker Plane for LFS458 - version 1.26.1 - Jun-Oct 2023
+# Create an Ubuntu machine (min 2 vCPU) or use the CFN template.
+# J.Watkins - QA
+# and
+# D.Ives    - QA
+#
+# To rename a host (e.g. CP3) 'sudo hostnamectl set-hostname worker2'
+# 
+# student$> chmod +x install-wk
+# student$> ./install-wk
+
+export DEBIAN_FRONTEND=noninteractive
+export INSTALL_NFS=False
+
+export VER=1.29.1    # Oct 2023
+#      VER=1.26.1    # July 2023
+
+./setup-vm
+
+./install-cntrd
+
+./install-k8s
+
+# All of the above is identical to Control Plane.
+# From here it is different for the worker node.
+# Step 11 - paste the join command from the CP.
+# Or follow the instructions to build a join command.
+
+echo ================================================================
+echo
+echo Install of Kubernetes $VER on worker node is done. 
+echo Next: 
+echo     run the "sudo echo IP-ADDR cp k8scp | sudo tee -a /etc/hosts"
+echo        command from the cp output    
+echo 
+echo "      Sudo Run the Join command (with sudo)"
+echo "      use 'tail kubeadm-init.out' on CP to find the join command."
+echo "      use 'kubeadm token create --print-join-command' to rebuild it."
+echo "      sudo kubeadm join ....."
+echo ""
+echo "      'kubectl get nodes -w' on CP and wait for worker to become ready."
+echo 
+echo ================================================================
+
+if (( $INSTALL_NFS == 'True' )); then
+    echo ================================================================
+    echo set up NFS as well. The mount command requires the hostname of 
+    echo k8scp to be set, so we leave the mount command until Lab 8.
+    echo ================================================================
+    sudo apt-get install -y nfs-common
+    #mount k8scp:/opt/shakespeare /mnt
+fi

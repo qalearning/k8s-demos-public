@@ -9,7 +9,7 @@ kubectl patch service \
   --type='json' \
   -p='[{"op": "replace", "path": "/spec/type", "value": "NodePort" }]'
 
-  #and if you want to skip token authentication (enables a "skip" button):
+#and if you want to skip token authentication (enables a "skip" button):
 kubectl patch deployment \
   kubernetes-dashboard --namespace kubernetes-dashboard \
   --type='json' \

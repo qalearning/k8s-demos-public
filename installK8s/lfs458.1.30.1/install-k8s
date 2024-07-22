@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Add repo for Kubernetes
+echo ================================================================
+echo add GPG key and add Kubernetes Repo 
+echo ================================================================
+sudo mkdir -m 755 /etc/apt/keyrings
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v$VER.1/deb/Release.key | sudo gpg --dearmor > /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v$VER.1/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+# Install the Kubernetes software, and lock the version
+echo ================================================================
+echo Update apt, then install kubeadm, kubelet, kubectl and hold them
+echo ================================================================
+sudo apt-get update
+sudo apt-get -y install kubelet=$VER.1-1.1 kubeadm=$VER.1-1.1 kubectl=$VER.1-1.1
+sudo apt-mark hold kubelet kubeadm kubectl
+
+# to see which packages are on hold, use 
+#      apt-mark showhold
+# to see which packages are installed, use
+#      apt list --installed | grep kub
+
+# Ensure Kubelet is running
+sudo systemctl enable --now kubelet
+
+echo ================================================================
+echo Kubernetes installed
+echo ================================================================
