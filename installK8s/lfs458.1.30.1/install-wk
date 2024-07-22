@@ -12,7 +12,7 @@
 # student$> ./install-wk
 
 export DEBIAN_FRONTEND=noninteractive
-export INSTALL_NFS=False
+export INSTALL_NFS="False"
 
 export VER=1.29      # Oct 2023
 #      VER=1.26.1    # July 2023
@@ -42,6 +42,8 @@ echo "      sudo kubeadm join ....."
 echo ""
 echo "      'kubectl get nodes -w' on CP and wait for worker to become ready."
 echo 
+echo " and then run 
+echo "  'kubectl certificate approve $(kubectl get csr --output=name)'"
 echo ================================================================
 
 if [[ "$INSTALL_NFS" == "True" ]]; then

@@ -59,7 +59,7 @@ serverTLSBootstrap: true
 EOF
 # the KubeletConfiguration above saves having to patch the metrics-server later
 # you'll need to run:
-# kubectl certificate approve $(kubectl get csr --output=name)"
+# "kubectl certificate approve $(kubectl get csr --output=name)"
 #   once all nodes are joined.
 # see https://particule.io/en/blog/kubeadm-metrics-server/
           
