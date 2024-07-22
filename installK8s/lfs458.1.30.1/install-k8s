@@ -4,9 +4,9 @@
 echo ================================================================
 echo add GPG key and add Kubernetes Repo 
 echo ================================================================
-sudo mkdir -m 755 /etc/apt/keyrings
-curl -fsSL https://pkgs.k8s.io/core:/stable:/v$VER.1/deb/Release.key | sudo gpg --dearmor > /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v$VER.1/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo mkdir -m -p 755 /etc/apt/keyrings
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v$VER/deb/Release.key | sudo gpg --dearmor | sudo tee /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v$VER/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
 # Install the Kubernetes software, and lock the version
 echo ================================================================
@@ -23,6 +23,14 @@ sudo apt-mark hold kubelet kubeadm kubectl
 
 # Ensure Kubelet is running
 sudo systemctl enable --now kubelet
+
+# Set the endpoints to containerd instead of docker
+echo ================================================================
+echo Set the crictl endpoints to containerd instead of docker
+echo ================================================================
+sudo crictl config --set \
+runtime-endpoint=unix:///run/containerd/containerd.sock \
+--set image-endpoint=unix:///run/containerd/containerd.sock
 
 echo ================================================================
 echo Kubernetes installed

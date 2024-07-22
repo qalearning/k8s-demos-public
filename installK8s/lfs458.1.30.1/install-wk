@@ -17,11 +17,11 @@ export INSTALL_NFS=False
 export VER=1.29.1    # Oct 2023
 #      VER=1.26.1    # July 2023
 
-./setup-vm
+bash ./setup-vm
 
-./install-cntrd
+bash ./install-cntrd
 
-./install-k8s
+bash ./install-k8s
 
 # All of the above is identical to Control Plane.
 # From here it is different for the worker node.

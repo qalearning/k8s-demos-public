@@ -23,5 +23,5 @@ net.bridge.bridge-nf-call-iptables = 1
 net.ipv4.ip_forward = 1
 EOF
 echo "--- start of output from systctl --system ---"
-sysctl --system
+sudo sysctl --system
 echo "--- end of output from systctl --system ---"

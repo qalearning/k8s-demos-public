@@ -26,20 +26,20 @@ export VER=1.29      # Jul 2024
 #          1.18.1-00 # Dec 2020
 
 # fetch the tarballs for LFS458 and / or LFD459:
-wget https://cm.lf.training/LFD459/LFD459_V1.30.1_SOLUTIONS.tar.xz --user=LFtraining --password=Penguin2014
+wget https://cm.lf.training/LFS458/LFS458_V1.30.1_SOLUTIONS.tar.xz --user=LFtraining --password=Penguin2014
 # wget https://cm.lf.training/LFD459/LFD459_V1.30.1_SOLUTIONS.tar.xz --user=LFtraining --password=Penguin2014
 tar -xf *SOL*
 
-./setup-vm
+bash ./setup-vm
 
-./install-cntrd
+bash ./install-cntrd
 
-./install-k8s
+bash ./install-k8s
 
 echo ================================================================
 echo Set hostname and add CNI Container Network Interface.
 echo ================================================================
-echo `hostname -i` k8scp  >> /etc/hosts
+echo `hostname -i` k8scp | sudo tee -a /etc/hosts
 
 echo ================================================================
 echo Initialise the CP:

@@ -34,11 +34,6 @@ sudo sysctl --system
 sudo systemctl restart containerd
 sudo systemctl enable containerd
 
-# Set the endpoints to containerd instead of docker
-sudo crictl config --set \
-runtime-endpoint=unix:///run/containerd/containerd.sock \
---set image-endpoint=unix:///run/containerd/containerd.sock
-
 echo ================================================================
 echo Containerd installed and configured
 echo ================================================================
