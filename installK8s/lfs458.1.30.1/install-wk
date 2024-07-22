@@ -44,7 +44,7 @@ echo "      'kubectl get nodes -w' on CP and wait for worker to become ready."
 echo 
 echo ================================================================
 
-if (( $INSTALL_NFS == 'True' )); then
+if [[ "$INSTALL_NFS" == "True" ]]; then
     echo ================================================================
     echo set up NFS as well. The mount command requires the hostname of 
     echo k8scp to be set, so we leave the mount command until Lab 8.

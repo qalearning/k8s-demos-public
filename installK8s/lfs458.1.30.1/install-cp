@@ -12,7 +12,7 @@
 
 # prevent Ubuntu from displaying interactive prompts 
 export DEBIAN_FRONTEND=noninteractive
-export INSTALL_NFS=False
+export INSTALL_NFS="False"
 export NETWORKPLUGIN=Cilium
 
 # Use the correct version of the cluster. Usually 1 version behind 
@@ -103,14 +103,14 @@ source ~/.bashrc
 echo
 echo ================================================================
 
-if (( $INSTALL_NFS == 'True' )); then
+if [[ "$INSTALL_NFS" == "True" ]]; then
   echo ================================================================
   echo set up NFS as well:
   echo ================================================================
   sudo apt-get install -y nfs-kernel-server
   sudo mkdir /opt/shakespeare
   sudo chmod 1777 /opt/shakespeare
-  echo "/opt/shakespeare/ *(rw,sync,no_root_squash,subtree_check)" | sudo tee > /etc/exports
+  echo "/opt/shakespeare/ *(rw,sync,no_root_squash,subtree_check)" | sudo tee -a /etc/exports
   sudo exportfs -ra
   echo "not here" | sudo tee > /opt/shakespeare/wheres-william.txt
 fi
